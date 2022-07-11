@@ -4,6 +4,7 @@
   "package": "rawrross.petloader.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MixinWolfEntity"
   ],
   "client": [
   ],

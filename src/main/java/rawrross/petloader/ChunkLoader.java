@@ -1,6 +1,5 @@
 package rawrross.petloader;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
@@ -50,7 +49,7 @@ public class ChunkLoader {
 //        LoadedChunk l = loaded.computeIfAbsent(entity, k -> new LoadedChunk());
 
         if (!loaded.containsKey(entity)) {
-            PetLoader.logger.info("Tracking entity " + entity);
+            PetLoaderMod.logger.info("Tracking entity " + entity);
             WorldChunk chunk = new WorldChunk(entity);
             loaded.put(entity, chunk);
             load(chunk, entity);
@@ -72,7 +71,7 @@ public class ChunkLoader {
 //        HashMap<TameableEntity, ChunkPos> loaded = worldLoaded.computeIfAbsent(world, k -> new HashMap<>());
 
         if (loaded.containsKey(entity)) {
-            PetLoader.logger.info("Untracked entity " + entity);
+            PetLoaderMod.logger.info("Untracked entity " + entity);
             WorldChunk chunk = loaded.remove(entity);
             unload(chunk, entity);
         }
@@ -85,7 +84,7 @@ public class ChunkLoader {
             WorldChunk currChunk = new WorldChunk(entity);
 
             if (!Objects.equals(currChunk, prevChunk)) {
-                PetLoader.logger.debug("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
+                PetLoaderMod.logger.debug("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
                 unload(prevChunk, entity);
                 load(currChunk, entity);
                 entry.setValue(currChunk);
@@ -103,7 +102,7 @@ public class ChunkLoader {
 
     private static void load(WorldChunk chunk, TameableEntity cause) {
         // TODO
-        PetLoader.logger.debug("Loading " + chunk + " due to " + cause);
+        PetLoaderMod.logger.debug("Loading " + chunk + " due to " + cause);
         setChunkLoaded(true, chunk);
     }
 
@@ -112,7 +111,7 @@ public class ChunkLoader {
             return;
 
         // TODO
-        PetLoader.logger.debug("Unloading chunk " + chunk + " due to " + cause);
+        PetLoaderMod.logger.debug("Unloading chunk " + chunk + " due to " + cause);
         setChunkLoaded(false, chunk);
     }
 

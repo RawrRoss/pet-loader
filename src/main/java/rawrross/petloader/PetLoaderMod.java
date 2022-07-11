@@ -6,16 +6,15 @@ import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PetLoader implements ModInitializer {
+public class PetLoaderMod implements ModInitializer {
 
     // TODO
-    // [ ] wolf
+    // [x] wolf
     // [ ] cat
     // [ ] parrot
 
     public static final String MODID = "petloader";
-
-    public static final Logger logger = LoggerFactory.getLogger(PetLoader.MODID);
+    public static final Logger logger = LoggerFactory.getLogger("PetLoader");
 
     @Override
     public void onInitialize() {

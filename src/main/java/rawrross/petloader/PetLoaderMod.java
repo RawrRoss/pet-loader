@@ -8,11 +8,6 @@ import org.slf4j.LoggerFactory;
 
 public class PetLoaderMod implements ModInitializer {
 
-    // TODO
-    // [x] wolf
-    // [ ] cat
-    // [ ] parrot
-
     public static final String MODID = "petloader";
     public static final Logger logger = LoggerFactory.getLogger("PetLoader");
 

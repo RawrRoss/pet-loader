@@ -5,9 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ChunkLoader {
 
@@ -42,6 +40,11 @@ public class ChunkLoader {
             return worldNameEqual && posEqual;
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(world, pos);
+        }
+
     }
 
     private static final HashMap<TameableEntity, WorldChunk> loadedEntities = new HashMap<>();
@@ -51,8 +54,8 @@ public class ChunkLoader {
             WorldChunk chunk = new WorldChunk(entity);
             PetLoaderMod.logger.info("Tracking entity " + entity + "/" + chunk.getDimensionString());
 
+            load(chunk);
             loadedEntities.put(entity, chunk);
-            load(chunk, entity);
         }
     }
 
@@ -61,11 +64,26 @@ public class ChunkLoader {
             WorldChunk chunk = loadedEntities.remove(entity);
             PetLoaderMod.logger.info("Untracked entity " + entity + "/" + chunk.getDimensionString());
 
-            unload(chunk, entity);
+            if (!getActiveChunks().contains(chunk)) {
+                unload(chunk);
+            } else {
+                PetLoaderMod.logger.info("Another entity prevented " + chunk + " from being unloaded");
+            }
         }
     }
 
+    private static HashSet<WorldChunk> getActiveChunks() {
+        HashSet<WorldChunk> activeChunks = new HashSet<>();
+        for (Map.Entry<TameableEntity, WorldChunk> entry : loadedEntities.entrySet()) {
+            activeChunks.add(entry.getValue());
+        }
+        return activeChunks;
+    }
+
     public static void update(MinecraftServer server) {
+        HashSet<WorldChunk> activeChunks = new HashSet<>();
+        ArrayList<WorldChunk> chunksToUnload = new ArrayList<>();
+
         for (Map.Entry<TameableEntity, WorldChunk> entry : loadedEntities.entrySet()) {
             TameableEntity entity = entry.getKey();
             WorldChunk prevChunk = entry.getValue();
@@ -74,31 +92,43 @@ public class ChunkLoader {
             if (!Objects.equals(currChunk, prevChunk)) {
                 PetLoaderMod.logger.info("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
 
-                unload(prevChunk, entity);
-                load(currChunk, entity);
+                chunksToUnload.add(prevChunk);
+
+                load(currChunk);
                 entry.setValue(currChunk);
+                activeChunks.add(currChunk);
+            } else {
+                activeChunks.add(prevChunk);
             }
 
             // TODO
-            // [ ] potential fix if pet unloads chunk while another is in it
+            // [x] fix if pet unloads chunk while another is in it
             // [x] don't track pets standing in vehicles
             // [x] verify moving dimensions, old world unloaded?
             // [x] setChunkForced
             // [x] unload on entity death
             // [x] still tracked when sitting with different player
         }
+
+        for (WorldChunk chunk : chunksToUnload) {
+            if (!activeChunks.contains(chunk)) {
+                unload(chunk);
+            } else {
+                PetLoaderMod.logger.info("Another entity prevented " + chunk + " from being unloaded");
+            }
+        }
     }
 
-    private static void load(WorldChunk chunk, TameableEntity cause) {
-        PetLoaderMod.logger.info("Loading " + chunk + " due to " + cause);
+    private static void load(WorldChunk chunk) {
+        PetLoaderMod.logger.info("Loading " + chunk);
         setChunkLoaded(true, chunk);
     }
 
-    private static void unload(WorldChunk chunk, TameableEntity cause) {
+    private static void unload(WorldChunk chunk) {
         if (chunk == null)
             return;
 
-        PetLoaderMod.logger.info("Unloading chunk " + chunk + " due to " + cause);
+        PetLoaderMod.logger.info("Unloading chunk " + chunk);
         setChunkLoaded(false, chunk);
     }
 

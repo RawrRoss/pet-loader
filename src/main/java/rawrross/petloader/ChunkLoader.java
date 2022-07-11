@@ -33,12 +33,12 @@ public class ChunkLoader {
             ChunkLoader.remove(pet);
     }
 
-    private static class WorldChunk {
+    private static class TrackedChunk {
 
         public ServerWorld world;
         public ChunkPos pos;
 
-        public WorldChunk(TameableEntity entity) {
+        public TrackedChunk(TameableEntity entity) {
             this.world = (ServerWorld) entity.world;
             this.pos = entity.getChunkPos();
         }
@@ -57,7 +57,7 @@ public class ChunkLoader {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            WorldChunk that = (WorldChunk) o;
+            TrackedChunk that = (TrackedChunk) o;
             boolean worldNameEqual = Objects.equals(world.toString(), that.world.toString()); // why is world.worldProperties.getLevelName() private???
             boolean posEqual = pos.equals(that.pos);
 
@@ -71,11 +71,11 @@ public class ChunkLoader {
 
     }
 
-    private static final HashMap<TameableEntity, WorldChunk> loadedEntities = new HashMap<>();
+    private static final HashMap<TameableEntity, TrackedChunk> loadedEntities = new HashMap<>();
 
     private static void register(TameableEntity entity) {
         if (!loadedEntities.containsKey(entity)) {
-            WorldChunk chunk = new WorldChunk(entity);
+            TrackedChunk chunk = new TrackedChunk(entity);
             PetLoaderMod.logger.info("Tracking entity " + entity + "/" + chunk.getDimensionString());
 
             load(chunk);
@@ -85,7 +85,7 @@ public class ChunkLoader {
 
     private static void remove(TameableEntity entity) {
         if (loadedEntities.containsKey(entity)) {
-            WorldChunk chunk = loadedEntities.remove(entity);
+            TrackedChunk chunk = loadedEntities.remove(entity);
             PetLoaderMod.logger.info("Untracked entity " + entity + "/" + chunk.getDimensionString());
 
             if (!getActiveChunks().contains(chunk)) {
@@ -96,22 +96,22 @@ public class ChunkLoader {
         }
     }
 
-    private static HashSet<WorldChunk> getActiveChunks() {
-        HashSet<WorldChunk> activeChunks = new HashSet<>();
-        for (Map.Entry<TameableEntity, WorldChunk> entry : loadedEntities.entrySet()) {
+    private static HashSet<TrackedChunk> getActiveChunks() {
+        HashSet<TrackedChunk> activeChunks = new HashSet<>();
+        for (Map.Entry<TameableEntity, TrackedChunk> entry : loadedEntities.entrySet()) {
             activeChunks.add(entry.getValue());
         }
         return activeChunks;
     }
 
     public static void update(MinecraftServer server) {
-        HashSet<WorldChunk> activeChunks = new HashSet<>();
-        ArrayList<WorldChunk> chunksToUnload = new ArrayList<>();
+        HashSet<TrackedChunk> activeChunks = new HashSet<>();
+        ArrayList<TrackedChunk> chunksToUnload = new ArrayList<>();
 
-        for (Map.Entry<TameableEntity, WorldChunk> entry : loadedEntities.entrySet()) {
+        for (Map.Entry<TameableEntity, TrackedChunk> entry : loadedEntities.entrySet()) {
             TameableEntity entity = entry.getKey();
-            WorldChunk prevChunk = entry.getValue();
-            WorldChunk currChunk = new WorldChunk(entity);
+            TrackedChunk prevChunk = entry.getValue();
+            TrackedChunk currChunk = new TrackedChunk(entity);
 
             if (!Objects.equals(currChunk, prevChunk)) {
                 PetLoaderMod.logger.info("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
@@ -126,7 +126,7 @@ public class ChunkLoader {
             }
         }
 
-        for (WorldChunk chunk : chunksToUnload) {
+        for (TrackedChunk chunk : chunksToUnload) {
             if (!activeChunks.contains(chunk)) {
                 unload(chunk);
             } else {
@@ -135,12 +135,12 @@ public class ChunkLoader {
         }
     }
 
-    private static void load(WorldChunk chunk) {
+    private static void load(TrackedChunk chunk) {
         PetLoaderMod.logger.info("Loading " + chunk);
         setChunkLoaded(true, chunk);
     }
 
-    private static void unload(WorldChunk chunk) {
+    private static void unload(TrackedChunk chunk) {
         if (chunk == null)
             return;
 
@@ -148,7 +148,7 @@ public class ChunkLoader {
         setChunkLoaded(false, chunk);
     }
 
-    private static void setChunkLoaded(boolean loaded, WorldChunk chunk) {
+    private static void setChunkLoaded(boolean loaded, TrackedChunk chunk) {
         ChunkPos pos = chunk.pos;
         chunk.world.setChunkForced(pos.x, pos.z, loaded);
     }

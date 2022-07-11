@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-
 public class ChunkLoader {
 
     private static class WorldChunk {
@@ -22,17 +21,25 @@ public class ChunkLoader {
             this.pos = entity.getChunkPos();
         }
 
+        public String getDimensionString() {
+            return world.getDimensionKey().getValue().toString();
+        }
+
         @Override
         public String toString() {
-            return "'" + world.toString() + "'/" + world.getDimensionKey().getValue() + " @ " + pos.toString();
+            return "'" + world.toString() + "'/" + getDimensionString() + " @ " + pos.toString();
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
+
             WorldChunk that = (WorldChunk) o;
-            return world.equals(that.world) && pos.equals(that.pos);
+            boolean worldNameEqual = Objects.equals(world.toString(), that.world.toString()); // why is world.worldProperties.getLevelName() private???
+            boolean posEqual = pos.equals(that.pos);
+
+            return worldNameEqual && posEqual;
         }
 
     }
@@ -41,9 +48,9 @@ public class ChunkLoader {
 
     public static void register(TameableEntity entity) {
         if (!loadedEntities.containsKey(entity)) {
-            PetLoaderMod.logger.info("Tracking entity " + entity);
-
             WorldChunk chunk = new WorldChunk(entity);
+            PetLoaderMod.logger.info("Tracking entity " + entity + "/" + chunk.getDimensionString());
+
             loadedEntities.put(entity, chunk);
             load(chunk, entity);
         }
@@ -51,9 +58,9 @@ public class ChunkLoader {
 
     public static void remove(TameableEntity entity) {
         if (loadedEntities.containsKey(entity)) {
-            PetLoaderMod.logger.info("Untracked entity " + entity);
-
             WorldChunk chunk = loadedEntities.remove(entity);
+            PetLoaderMod.logger.info("Untracked entity " + entity + "/" + chunk.getDimensionString());
+
             unload(chunk, entity);
         }
     }
@@ -73,8 +80,9 @@ public class ChunkLoader {
             }
 
             // TODO
-            // [ ] verify moving dimensions, old world unloaded?
             // [ ] don't track pets standing in vehicles
+            // [ ] potential fix if pet unloads chunk while another is in it
+            // [x] verify moving dimensions, old world unloaded?
             // [x] setChunkForced
             // [x] unload on entity death
             // [x] still tracked when sitting with different player

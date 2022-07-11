@@ -4,7 +4,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
@@ -23,17 +22,22 @@ public abstract class MixinWolfEntity extends TameableEntity {
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
     private void injectTickMovement(CallbackInfo ci) {
-        if (this.world.isClient || !this.isTamed() || this.isDead())
+        if (this.world.isClient || !this.isTamed())
             return;
 
-        MinecraftServer server = ((ServerWorld) this.world).getServer();
-
-        // Owner will be null if they're offline, and the pet will always sit.
+        // Determines if the owner is online and in the same dimension as the pet.
+        // The pet will always sit if its owner is not present.
         // Note: isSitting() returns false if the pet was standing when the owner left.
-        ServerPlayerEntity owner = server.getPlayerManager().getPlayer(this.getOwnerUuid());
+        ServerPlayerEntity owner = null;
+        for (ServerPlayerEntity player : ((ServerWorld) this.world).getPlayers()) {
+            if (player.getUuid().equals(this.getOwnerUuid())) {
+                owner = player;
+                break;
+            }
+        }
 
-        boolean shouldRegister = !this.isSitting() && owner != null;
-
+        boolean entityIsValid = !(this.isDead() || this.isRemoved() || this.isSitting());
+        boolean shouldRegister = entityIsValid && owner != null;
         if (shouldRegister)
             ChunkLoader.register(this);
         else

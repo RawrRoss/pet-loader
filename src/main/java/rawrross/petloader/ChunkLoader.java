@@ -80,8 +80,8 @@ public class ChunkLoader {
             }
 
             // TODO
-            // [ ] don't track pets standing in vehicles
             // [ ] potential fix if pet unloads chunk while another is in it
+            // [x] don't track pets standing in vehicles
             // [x] verify moving dimensions, old world unloaded?
             // [x] setChunkForced
             // [x] unload on entity death

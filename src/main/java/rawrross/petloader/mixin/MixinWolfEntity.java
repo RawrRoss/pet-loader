@@ -36,7 +36,7 @@ public abstract class MixinWolfEntity extends TameableEntity {
             }
         }
 
-        boolean entityIsValid = !(this.isDead() || this.isRemoved() || this.isSitting());
+        boolean entityIsValid = !(this.isDead() || this.isRemoved() || this.isSitting() || this.hasVehicle());
         boolean shouldRegister = entityIsValid && owner != null;
         if (shouldRegister)
             ChunkLoader.register(this);

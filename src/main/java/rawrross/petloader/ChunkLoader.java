@@ -2,12 +2,36 @@ package rawrross.petloader;
 
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.ChunkPos;
 
 import java.util.*;
 
 public class ChunkLoader {
+
+    public static void queryEntity(TameableEntity pet) {
+        if (pet.world.isClient || !pet.isTamed())
+            return;
+
+        // Determines if the owner is online and in the same dimension as the pet.
+        // The pet will always sit if its owner is not present.
+        // Note: isSitting() returns false if the pet was standing when the owner left.
+        ServerPlayerEntity owner = null;
+        for (ServerPlayerEntity player : ((ServerWorld) pet.world).getPlayers()) {
+            if (player.getUuid().equals(pet.getOwnerUuid())) {
+                owner = player;
+                break;
+            }
+        }
+
+        boolean entityIsValid = !(pet.isDead() || pet.isRemoved() || pet.isSitting() || pet.hasVehicle() || pet.isLeashed());
+        boolean shouldRegister = entityIsValid && owner != null;
+        if (shouldRegister)
+            ChunkLoader.register(pet);
+        else
+            ChunkLoader.remove(pet);
+    }
 
     private static class WorldChunk {
 
@@ -49,7 +73,7 @@ public class ChunkLoader {
 
     private static final HashMap<TameableEntity, WorldChunk> loadedEntities = new HashMap<>();
 
-    public static void register(TameableEntity entity) {
+    private static void register(TameableEntity entity) {
         if (!loadedEntities.containsKey(entity)) {
             WorldChunk chunk = new WorldChunk(entity);
             PetLoaderMod.logger.info("Tracking entity " + entity + "/" + chunk.getDimensionString());
@@ -59,7 +83,7 @@ public class ChunkLoader {
         }
     }
 
-    public static void remove(TameableEntity entity) {
+    private static void remove(TameableEntity entity) {
         if (loadedEntities.containsKey(entity)) {
             WorldChunk chunk = loadedEntities.remove(entity);
             PetLoaderMod.logger.info("Untracked entity " + entity + "/" + chunk.getDimensionString());
@@ -100,14 +124,6 @@ public class ChunkLoader {
             } else {
                 activeChunks.add(prevChunk);
             }
-
-            // TODO
-            // [x] fix if pet unloads chunk while another is in it
-            // [x] don't track pets standing in vehicles
-            // [x] verify moving dimensions, old world unloaded?
-            // [x] setChunkForced
-            // [x] unload on entity death
-            // [x] still tracked when sitting with different player
         }
 
         for (WorldChunk chunk : chunksToUnload) {

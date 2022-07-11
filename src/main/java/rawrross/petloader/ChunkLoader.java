@@ -17,11 +17,6 @@ public class ChunkLoader {
         public ServerWorld world;
         public ChunkPos pos;
 
-        public WorldChunk(ServerWorld world, ChunkPos pos) {
-            this.world = world;
-            this.pos = pos;
-        }
-
         public WorldChunk(TameableEntity entity) {
             this.world = (ServerWorld) entity.world;
             this.pos = entity.getChunkPos();
@@ -42,67 +37,52 @@ public class ChunkLoader {
 
     }
 
-    private static HashMap<TameableEntity, WorldChunk> loaded = new HashMap<>();
+    private static final HashMap<TameableEntity, WorldChunk> loadedEntities = new HashMap<>();
 
     public static void register(TameableEntity entity) {
-        ServerWorld world = (ServerWorld) entity.getWorld();
-//        LoadedChunk l = loaded.computeIfAbsent(entity, k -> new LoadedChunk());
-
-        if (!loaded.containsKey(entity)) {
+        if (!loadedEntities.containsKey(entity)) {
             PetLoaderMod.logger.info("Tracking entity " + entity);
+
             WorldChunk chunk = new WorldChunk(entity);
-            loaded.put(entity, chunk);
+            loadedEntities.put(entity, chunk);
             load(chunk, entity);
         }
-
-//        ChunkPos currPos = entity.getChunkPos();
-//        ChunkPos prevPos = loaded.getOrDefault(entity, null);
-//
-//        if (!Objects.equals(currPos, prevPos)) {
-//            // TODO unload prevPos
-//            // TODO load currPos
-//        }
-//
-//        loaded.put(entity, currPos);
     }
 
     public static void remove(TameableEntity entity) {
-        ServerWorld world = (ServerWorld) entity.getWorld();
-//        HashMap<TameableEntity, ChunkPos> loaded = worldLoaded.computeIfAbsent(world, k -> new HashMap<>());
-
-        if (loaded.containsKey(entity)) {
+        if (loadedEntities.containsKey(entity)) {
             PetLoaderMod.logger.info("Untracked entity " + entity);
-            WorldChunk chunk = loaded.remove(entity);
+
+            WorldChunk chunk = loadedEntities.remove(entity);
             unload(chunk, entity);
         }
     }
 
     public static void update(MinecraftServer server) {
-        for (Map.Entry<TameableEntity, WorldChunk> entry : loaded.entrySet()) {
+        for (Map.Entry<TameableEntity, WorldChunk> entry : loadedEntities.entrySet()) {
             TameableEntity entity = entry.getKey();
             WorldChunk prevChunk = entry.getValue();
             WorldChunk currChunk = new WorldChunk(entity);
 
             if (!Objects.equals(currChunk, prevChunk)) {
-                PetLoaderMod.logger.debug("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
+                PetLoaderMod.logger.info("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
+
                 unload(prevChunk, entity);
                 load(currChunk, entity);
                 entry.setValue(currChunk);
             }
 
-//            server.getPlayerManager().getPlayer()
-
             // TODO
-            // [x] setChunkForced
             // [ ] verify moving dimensions, old world unloaded?
+            // [ ] don't track pets standing in vehicles
+            // [x] setChunkForced
             // [x] unload on entity death
             // [x] still tracked when sitting with different player
         }
     }
 
     private static void load(WorldChunk chunk, TameableEntity cause) {
-        // TODO
-        PetLoaderMod.logger.debug("Loading " + chunk + " due to " + cause);
+        PetLoaderMod.logger.info("Loading " + chunk + " due to " + cause);
         setChunkLoaded(true, chunk);
     }
 
@@ -110,8 +90,7 @@ public class ChunkLoader {
         if (chunk == null)
             return;
 
-        // TODO
-        PetLoaderMod.logger.debug("Unloading chunk " + chunk + " due to " + cause);
+        PetLoaderMod.logger.info("Unloading chunk " + chunk + " due to " + cause);
         setChunkLoaded(false, chunk);
     }
 

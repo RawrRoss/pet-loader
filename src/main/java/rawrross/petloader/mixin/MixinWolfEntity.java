@@ -23,31 +23,14 @@ public abstract class MixinWolfEntity extends TameableEntity {
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
     private void injectTickMovement(CallbackInfo ci) {
-//        System.out.println("==========");
-//        System.out.println("isTamed: " + this.isTamed());
-//        System.out.println("isSitting: " + this.isSitting());
-//        System.out.println("isInSittingPose: " + this.isInSittingPose());
-
         if (this.world.isClient || !this.isTamed() || this.isDead())
             return;
 
+        MinecraftServer server = ((ServerWorld) this.world).getServer();
 
-
-//        this.isSitting()
-//        this.getChunkPos()
-//        world.setChunkForced()
-
-        // if !sitting: register self with chunkloader
-        // else: remove self
-
-//        boolean isStanding = !this.isInSittingPose();
-
-        ServerWorld world = (ServerWorld) this.world;
-        ServerPlayerEntity owner = world.getServer().getPlayerManager().getPlayer(this.getOwnerUuid());
         // Owner will be null if they're offline, and the pet will always sit.
         // Note: isSitting() returns false if the pet was standing when the owner left.
-
-//        System.out.println(owner);
+        ServerPlayerEntity owner = server.getPlayerManager().getPlayer(this.getOwnerUuid());
 
         boolean shouldRegister = !this.isSitting() && owner != null;
 

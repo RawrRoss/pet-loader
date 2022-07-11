@@ -1,29 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "petloader",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Pet Loader",
+  "description": "If a pet is standing, force load the chunk so they won't get left behind if it were to unload.",
   "authors": [
-    "Me!"
+    "RawrRoss"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/petloader/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "rawrross.petloader.PetLoader"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "petloader.mixins.json"
   ],
 
   "depends": {
@@ -33,6 +31,5 @@
     "java": ">=17"
   },
   "suggests": {
-    "another-mod": "*"
   }
 }

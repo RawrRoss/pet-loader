@@ -91,7 +91,7 @@ public class ChunkLoader {
             if (!getActiveChunks().contains(chunk)) {
                 unload(chunk);
             } else {
-                PetLoaderMod.logger.info("Another entity prevented " + chunk + " from being unloaded");
+                PetLoaderMod.logger.debug("Another entity prevented " + chunk + " from being unloaded");
             }
         }
     }
@@ -114,7 +114,7 @@ public class ChunkLoader {
             TrackedChunk currChunk = new TrackedChunk(entity);
 
             if (!Objects.equals(currChunk, prevChunk)) {
-                PetLoaderMod.logger.info("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
+                PetLoaderMod.logger.debug("Entity " + entity + " moved from " + prevChunk + " to " + currChunk);
 
                 chunksToUnload.add(prevChunk);
 
@@ -130,13 +130,13 @@ public class ChunkLoader {
             if (!activeChunks.contains(chunk)) {
                 unload(chunk);
             } else {
-                PetLoaderMod.logger.info("Another entity prevented " + chunk + " from being unloaded");
+                PetLoaderMod.logger.debug("Another entity prevented " + chunk + " from being unloaded");
             }
         }
     }
 
     private static void load(TrackedChunk chunk) {
-        PetLoaderMod.logger.info("Loading " + chunk);
+        PetLoaderMod.logger.debug("Loading " + chunk);
         setChunkLoaded(true, chunk);
     }
 
@@ -144,7 +144,7 @@ public class ChunkLoader {
         if (chunk == null)
             return;
 
-        PetLoaderMod.logger.info("Unloading chunk " + chunk);
+        PetLoaderMod.logger.debug("Unloading chunk " + chunk);
         setChunkLoaded(false, chunk);
     }
 

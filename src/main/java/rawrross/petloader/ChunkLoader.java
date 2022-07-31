@@ -14,16 +14,10 @@ public class ChunkLoader {
         if (pet.world.isClient || !pet.isTamed())
             return;
 
-        // Determines if the owner is online and in the same dimension as the pet.
+        // Determines if the owner is online, will be null if player is offline.
         // The pet will always sit if its owner is not present.
         // Note: isSitting() returns false if the pet was standing when the owner left.
-        ServerPlayerEntity owner = null;
-        for (ServerPlayerEntity player : ((ServerWorld) pet.world).getPlayers()) {
-            if (player.getUuid().equals(pet.getOwnerUuid())) {
-                owner = player;
-                break;
-            }
-        }
+        ServerPlayerEntity owner = ((ServerWorld) pet.world).getServer().getPlayerManager().getPlayer(pet.getOwnerUuid());
 
         boolean entityIsValid = !(pet.isDead() || pet.isRemoved() || pet.isSitting() || pet.hasVehicle() || pet.isLeashed());
         boolean shouldRegister = entityIsValid && owner != null;

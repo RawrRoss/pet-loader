@@ -1,9 +1,12 @@
-# Fabric Example Mod
+# <img alt="mod icon" src="src\main\resources\assets\petloader\icon.png" width=100> Pet Loader - Fabric
 
-## Setup
+Pet Loader is a server-side mod that force-loads chunks that standing pets reside in. This allows them to still teleport to you when they otherwise would have been unloaded, such as when you're crossing a large ocean.
 
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
+This only applies to pets that can teleport: wolves, cats, and parrots.
 
-## License
+# Requires
+- [Fabric API]( https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+# Known issues
+- Chunks manually loaded, such as with the `forceload` command, will be overwritten by pets passing through them.
+    - However, on world saving and loading, chunks do not remember how they were force loaded.

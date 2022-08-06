@@ -9,6 +9,9 @@
     "RawrRoss"
   ],
   "contact": {
+    "homepage": "https://github.com/RawrRoss/pet-loader",
+    "sources": "https://github.com/RawrRoss/pet-loader",
+    "issues": "https://github.com/RawrRoss/pet-loader/issues"
   },
 
   "license": "CC0-1.0",
